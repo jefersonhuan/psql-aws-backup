@@ -18,18 +18,22 @@ func fullPath(filename string) string {
 
 func uploadToS3(filename string) {
 	fmt.Println("Enviando backup ao S3...")
-	sess := session.Must(session.NewSession())
+
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String("us-east-1"),
+	}))
+
 	uploader := s3manager.NewUploader(sess)
 
 	file, err := os.Open(fullPath(filename))
 
 	if err != nil {
-		println(err)
+		fmt.Println(err)
 		return
 	}
 
 	result, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String("backup"),
+		Bucket: aws.String("brasiliaio"),
 		Key:    aws.String(filename),
 		Body:   file,
 	})
@@ -37,7 +41,7 @@ func uploadToS3(filename string) {
 	defer file.Close()
 
 	if err != nil {
-		println(err)
+		fmt.Println(err)
 		return
 	}
 
