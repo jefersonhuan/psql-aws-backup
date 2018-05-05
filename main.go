@@ -20,7 +20,7 @@ func uploadToS3(filename string) {
 	fmt.Println("Enviando backup ao S3...")
 
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1"),
+		Region: aws.String(os.Getenv("AWS-REGION")),
 	}))
 
 	uploader := s3manager.NewUploader(sess)
@@ -33,7 +33,7 @@ func uploadToS3(filename string) {
 	}
 
 	result, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String("brasiliaio"),
+		Bucket: aws.String(os.Getenv("AWS-BUCKET")),
 		Key:    aws.String(filename),
 		Body:   file,
 	})
@@ -54,11 +54,11 @@ func main() {
 	arg1 := "postgres"
 	arg2 := "-c"
 
-	app := "brasiliaio_5" // os.Getenv("PSQL-BACKUP-APP")
-	db := "brasiliaio_production_5" // os.Getenv("PSQL-BACKUP-DB")
+	user := os.Getenv("PSQL-BACKUP-USER")
+	db := os.Getenv("PSQL-BACKUP-DB")
 
 	filename := fmt.Sprintf("pg-%d.dump", time.Now().Unix())
-	arg3 := fmt.Sprintf("pg_dump -U %s -w %s > %s", app, db, fullPath(filename))
+	arg3 := fmt.Sprintf("pg_dump -U %s -w %s > %s", user, db, fullPath(filename))
 
 	fmt.Println("Criando backup", filename)
 	exec.Command(cmd, arg0, arg1, arg2, arg3).Output()
